@@ -218,7 +218,7 @@ class Amqdb():
                 songinfo = song["songInfo"]
                 
                 
-                if songinfo["animeNames"]["english"].count("'")==1:
+                if songinfo["animeNames"]["english"].count("'")>=1:
                     songinfo["animeNames"]["english"]=songinfo["animeNames"]["english"].replace("'","''")
 
                 
