@@ -3,6 +3,17 @@ import dbhandle
 import shutil
 import os
 
+
+
+
+#set up directory
+
+if not os.path.exists("games json"):
+     os.path.exists("games json")
+if not os.path.exists("games_db"):
+     os.path.exists("games_db")
+
+
 directory = "games json"
 db = dbhandle.Amqdb()
 fileindb = os.listdir("games_db")
