@@ -93,7 +93,8 @@ TABLES['songs'] = (
 
 
 
-
+#weird table name, either i sould've made a songs_in_game and another table with the guessed or keep it like this but 
+#name it differently
 TABLES['songs_in_game'] = ("""
     CREATE TABLE songs_in_game (
     game_id INT,
@@ -167,7 +168,8 @@ class Amqdb():
                 print("OK")
                 
 
-
+    #if there are two games with the same start time and date it will ignore the second 
+    #but since i only use this for myself this is fine
     def check_game(self, game):
                 
         self.cursor.execute("""SELECT * FROM games 
@@ -181,12 +183,12 @@ class Amqdb():
     
     def add_game(self,game):
 
-            # this for loop is supposed to list the players in game by check every answer and list since the json doesn't list the player
+            # this for loop is supposed to list the players in game by checking every answer and song origin. Since the json doesn't list the player
             # however if the game doesn't play any song from a player's list and this player doesn't guessed any song it won't be listed anywhere
-            # for this reason I add my username since I'll probably only add game I was in
-            playerlist = ["smemorato"]
+            # i could add my username directly to the list since i probably will only add my games
+            playerlist = []
             for song in game["songs"]:
-
+                
                 playerlist.extend([item for item in song["correctGuessPlayers"] if item not in playerlist])
                 for plist in song["listStates"]:
                     if plist["name"] not in  playerlist:
@@ -197,6 +199,7 @@ class Amqdb():
             add_game_query = ("""INSERT INTO games
                             (room_name, start_time,number_songs)
                             VALUES (%s, %s, %s)""")
+            #game["songs"][-1]["songNumber"] gets the number of the las song
             game_data = (game["roomName"], game["startTime"],game["songs"][-1]["songNumber"])
             self.cursor.execute(add_game_query, game_data)
 
@@ -217,7 +220,7 @@ class Amqdb():
             for song in game["songs"]:
                 songinfo = song["songInfo"]
                 
-                
+                #remove ' from the name name of title
                 if songinfo["animeNames"]["english"].count("'")>=1:
                     songinfo["animeNames"]["english"]=songinfo["animeNames"]["english"].replace("'","''")
 
@@ -242,10 +245,7 @@ class Amqdb():
                             'nkitsu_id': songinfo["siteIds"]["kitsuId"],
                             'nanilist_id':songinfo["siteIds"]["aniListId"]}
 
-                #print(int(songinfo["vintage"][len(songinfo["vintage"])-4:]))
-                #print([type(anime_data[k]) for k in anime_data])
-                #print([anime_data[k] for k in anime_data])
-
+                # **operator return argument arguments as a par of key and variable
                 add_anime = ("""INSERT INTO animes
                             (english_name, romaji_name, anime_type, season, year, anime_score, amq_id, mal_id, kitsu_id, anilist_id)
                             VALUES 
@@ -336,6 +336,8 @@ class Amqdb():
                                     nanime_difficulty = songinfo["animeDifficulty"]))
 
                 self.cursor.execute(add_song)
+
+
                 for player in playerlist:
 
                     list =False
@@ -351,7 +353,7 @@ class Amqdb():
                             aniscore = song["listStates"][i]["score"]
                         i+=1
 
-
+                    #TODO attribuite a number to the Insert songs otherwise i would be able to group 
                     add_song_to_game = ("""INSERT INTO songs_in_game
                                         (game_id, song_id, player_id, guessed_correct, in_list,score)
                                         VALUES(
@@ -387,7 +389,7 @@ class Amqdb():
 
     def get_song_type(self):
 
-            # add column just to be easier to see 
+        # add column for the types just to be easier to see 
         self.cursor.execute("""UPDATE songs 
                         SET type_string = "OP" 
                         WHERE song_type = 1""")
